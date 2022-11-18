@@ -42,6 +42,9 @@ datasets :
 
 background : 'tlo_30s'
 
+base_raw_dir: 'data/raw/foils'
 measurment_directory : '2022_11_17_bp'
+
+output_dir: 'data/interim/foils'
 
 radius: 200

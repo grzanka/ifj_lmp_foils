@@ -23,25 +23,31 @@ rule all:
     input:
         # expect raw file readed for basic, IRI and FF datasets
         expand(
-            "data/interim/ifj_data/{measurment_directory}/{datasets}/raw.npy",
+            "data/interim/foils/{measurment_directory}/{datasets}/raw.npy",
             zip,
             datasets=datasets,
             measurment_directory=[measurement_directory]*len(datasets)
         ),
         expand(
-            "data/interim/ifj_data/{measurment_directory}/{datasets}/raw-after-ff.npy",
+            "data/interim/foils/{measurment_directory}/{datasets}/raw-after-ff.npy",
             zip,
             datasets=datasets,
             measurment_directory=[measurement_directory]*len(datasets)
         ),
         expand(
-            "data/interim/ifj_data/{measurment_directory}/{datasets}/raw-aligned.npy",
+            "data/interim/foils/{measurment_directory}/{datasets}/raw-aligned.npy",
             zip,
             datasets=datasets,
             measurment_directory=[measurement_directory]*len(datasets)
         ),
         expand(
-            "data/interim/ifj_data/{measurment_directory}/stages.pdf",
+            "data/interim/foils/{measurment_directory}/{datasets}/stages.pdf",
+            zip,
+            datasets=datasets,
+            measurment_directory=[measurement_directory]*len(datasets)
+        ),
+        expand(
+            "data/interim/foils/{measurment_directory}/stages.pdf",
             zip,
             datasets=datasets,
             measurment_directory=[measurement_directory]*len(datasets)
@@ -53,11 +59,11 @@ include: "rules/raw.smk"
 
 rule plot_all_stages:
     input:
-        plot_file=expand("data/interim/ifj_data/{measurment_directory}/{datasets}/stages.pdf", 
+        plot_file=expand("data/interim/foils/{measurment_directory}/{datasets}/stages.pdf", 
             zip,
             datasets=datasets,
             measurment_directory=[measurement_directory]*len(datasets))
     output:
-        plot_file="data/interim/ifj_data/{measurment_directory}/stages.pdf",
+        plot_file="data/interim/foils/{measurment_directory}/stages.pdf",
     shell:
         "pdftk {input.plot_file} cat output {output.plot_file}"
