@@ -1,0 +1,14 @@
+# local package
+-e .
+
+# external requirements
+yapf
+
+# project
+numpy>=1.20
+jupyter
+matplotlib
+scipy
+opencv-python-headless
+tqdm
+snakemake
