@@ -36,14 +36,14 @@ class Circle:
             circle = cls(**json_data)
         return circle
 
-    def section_x(self, x : float) -> Tuple[float]:
+    def section_x(self, x : float) -> Tuple[float, float]:
         under_sqrt = self.r**2 - (x - self.x)**2
         result = (float('nan'), float('nan'))        
         if under_sqrt >= 0:
             result = (self.y - math.sqrt(under_sqrt), self.y + math.sqrt(under_sqrt))
         return result
 
-    def section_y(self, y : float) -> Tuple[float]:
+    def section_y(self, y : float) -> Tuple[float, float]:
         under_sqrt = self.r**2 - (y - self.y)**2
         result = (float('nan'), float('nan'))        
         if under_sqrt >= 0:
