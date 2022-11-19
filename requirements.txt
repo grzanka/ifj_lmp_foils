@@ -3,6 +3,7 @@
 
 # external requirements
 yapf
+pytest
 
 # project
 numpy>=1.20

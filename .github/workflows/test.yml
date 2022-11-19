@@ -1,0 +1,32 @@
+name: Automated tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2.3.1
+        with:
+          python-version: ['3.9', '3.10']
+
+      - name: Python Dependency Installation
+        run: pip install -r requirements.txt
+          
+      - name: Test notebooks
+        run: |
+          pytest --nbmake **/**/*ipynb
+
+      - name: Test code
+        run: pytest test
+
+      - name: Test basic snakemake
+        run: snakemake --cores all
