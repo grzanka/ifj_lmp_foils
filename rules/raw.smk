@@ -4,24 +4,21 @@ from pathlib import Path
 
 import numpy as np
 import matplotlib
-
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from scipy import ndimage
 
 from src.visualisation.plot import plot_data
-
 from src.data.analysis import (
     read_tiff_img,
     subtract_background,
     Circle,
     create_circular_mask,
 )
-
 from src.data.detector import (
     img_for_circle_detection,
     find_circle_hough_method
 )
-
 from src.data.alignment import (
     get_line_circle,
     get_angle_with_min_value,
@@ -105,7 +102,6 @@ rule flat_field:
 
         analysis_circle.save_json(output.analysis_circle)
         np.save(file=output.data, arr=corr_data_full)
-        # plot_data(corr_data_full, output.plot, circle_px=analysis_circle)
 
 rule signal_on_circle:
     input:
@@ -132,23 +128,17 @@ rule align_top:
         data="data/interim/foils/{measurment_directory}/{dataset}/raw-aligned.npy",
         aligned_det_circle="data/interim/foils/{measurment_directory}/{dataset}/aligned-det-circle.json",
     run:
-        from scipy import ndimage
         angle = np.load(file=input.angle)
         data = np.load(file=input.image)
-
-        # detector circle
-        circle = Circle.from_json(input.circle)
+        circle = Circle.from_json(input.circle)         # detector circle
 
         # shift image, so the image is aligned with detector center
         shifted = ndimage.shift(data, (data.shape[1]/2-circle.y,data.shape[0]/2-circle.x), cval=np.nan, prefilter=False)
         # rotate image, so the mark is on the top
         rotated = ndimage.rotate(shifted, -angle, cval=np.nan, reshape=False, prefilter=False)
-        aligned = rotated
-
-        # plot_data(aligned, output.plot)
-        np.save(file=output.data, arr=np.array(aligned))
-
         aligned_circle = Circle(x=data.shape[1]/2, y=data.shape[0]/2, r=circle.r)
+
+        np.save(file=output.data, arr=np.array(rotated))
         aligned_circle.save_json(output.aligned_det_circle)
 
 rule plot_stages:
