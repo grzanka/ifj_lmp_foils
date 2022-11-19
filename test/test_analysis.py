@@ -3,8 +3,9 @@ import numpy as np
 import numpy.typing as npt
 import pytest
 from src.data.paths import project_dir
-from src.data.analysis import Circle, get_angle_with_min_value, get_line_circle, median_filter, read_tiff_img, find_detector
-
+from src.data.analysis import Circle, median_filter, read_tiff_img
+from src.data.detector import find_detector
+from src.data.alignment import get_line_circle, get_angle_with_min_value
 
 @pytest.fixture()
 def img_path(request):
