@@ -1,23 +1,31 @@
 import json
 import dataclasses
 from pathlib import Path
+
 import numpy as np
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+from src.visualisation.plot import plot_data
+
 from src.data.analysis import (
     read_tiff_img,
     subtract_background,
-    plot_data,
-    img_for_circle_detection,
-    find_circle_hough_method,
     Circle,
-    get_line_circle,
-    get_angle_with_min_value,
     create_circular_mask,
 )
 
+from src.data.detector import (
+    img_for_circle_detection,
+    find_circle_hough_method
+)
+
+from src.data.alignment import (
+    get_line_circle,
+    get_angle_with_min_value,
+)
 
 rule read_tiff:
     input:

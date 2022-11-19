@@ -8,7 +8,7 @@ from src.data.detector import find_detector
 from src.data.alignment import get_line_circle, get_angle_with_min_value
 
 @pytest.fixture()
-def img_path(request):
+def img_path(request) -> Path:
     marker = request.node.get_closest_marker("experiment_id")
     experiment_id = '2'
     if marker:
@@ -19,13 +19,13 @@ def img_path(request):
 
 
 @pytest.fixture
-def detector_image(img_path):
+def detector_image(img_path) -> npt.NDArray:
     img_meas = read_tiff_img(img_path)
     return img_meas
 
 
 @pytest.fixture
-def detector_image_bg():
+def detector_image_bg() -> npt.NDArray:
     return read_tiff_img(
         Path(project_dir, 'test', 'res', 'bg_30s', 'Pos0', 'img_000000000_Default_000.tif'))
 
