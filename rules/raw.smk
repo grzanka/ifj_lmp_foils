@@ -29,6 +29,8 @@ rule read_tiff:
         data="data/raw/foils/{measurment_directory}/{dataset}/Pos0/img_000000000_Default_000.tif",
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}/raw.npy",
+    benchmark:
+        "data/interim/foils/{measurment_directory}/{dataset}/benchmark/read_tiff.tsv",
     run:
         data = read_tiff_img(file_path=input.data, border_px=0)
         Path(output[0]).parent.mkdir(exist_ok=True, parents=True)
@@ -40,6 +42,8 @@ rule background_image_subtraction:
         background="data/interim/foils/{measurment_directory}/" +f"{background}/raw.npy"
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}/raw-bg-image-removed.npy",
+    benchmark:
+        "data/interim/foils/{measurment_directory}/{dataset}/benchmark/background_image_subtraction.tsv",
     run:
         data_signal = np.load(file=input.signal)
         data_background = np.load(file=input.background)
@@ -51,6 +55,8 @@ rule background_constant_subtraction:
         data="data/interim/foils/{measurment_directory}/{dataset}lv/raw.npy",
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}lv/raw-bg-const-removed.npy",
+    benchmark:
+        "data/interim/foils/{measurment_directory}/{dataset}/benchmark/background_constant_subtraction.tsv",
     run:
         data_signal = np.load(file=input.data)
         constant_background_level = np.nanmin(data_signal)
@@ -62,6 +68,8 @@ rule image_contour:
         data=rules.background_constant_subtraction.output.data,
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}lv/raw-threshold.npy",
+    benchmark:
+        "data/interim/foils/{measurment_directory}/{dataset}/benchmark/image_contour.tsv",
     run:
         data_lv = np.load(file=input.data)
         data_thres = img_for_circle_detection(input=data_lv)
@@ -72,6 +80,8 @@ rule detector_circle:
         data=rules.image_contour.output.data,
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}lv/det-circle.json",
+    benchmark:
+        "data/interim/foils/{measurment_directory}/{dataset}/benchmark/detector_circle.tsv",
     run:
         data = np.load(file=input.data)
         circle = find_circle_hough_method(data)
@@ -84,6 +94,8 @@ rule flat_field:
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}/raw-after-ff.npy",
         ff_circle="data/interim/foils/{measurment_directory}/{dataset}/ff-circle.json",
+    benchmark:
+        "data/interim/foils/{measurment_directory}/{dataset}/benchmark/flat_field.tsv",
     params:
         radius=ff_radius,
     run:
@@ -108,6 +120,8 @@ rule signal_on_circle:
         circle=rules.detector_circle.output.data,
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}/angle.npy",
+    benchmark:
+        "data/interim/foils/{measurment_directory}/{dataset}/benchmark/signal_on_circle.tsv",
     run:
         data = np.load(file=input.image)
         circle = Circle.from_json(input.circle)
@@ -126,6 +140,8 @@ rule align_top:
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}/raw-aligned.npy",
         aligned_det_circle="data/interim/foils/{measurment_directory}/{dataset}/aligned-det-circle.json",
+    benchmark:
+        "data/interim/foils/{measurment_directory}/{dataset}/benchmark/align_top.tsv",
     run:
         angle = np.load(file=input.angle)
         data = np.load(file=input.image)
@@ -149,6 +165,8 @@ rule plot_stages:
         aligned_det_circle=rules.align_top.output.aligned_det_circle,    
     output:
         plot_file="data/interim/foils/{measurment_directory}/{dataset}/stages.pdf",
+    benchmark:
+        "data/interim/foils/{measurment_directory}/{dataset}/benchmark/plot_stages.tsv",
     params:
         analysis_radius=analysis_radius,
     run:
