@@ -5,3 +5,4 @@ base_raw_dir: 'data/raw/foils'
 output_dir: 'data/interim/foils'
 ff_radius: 300
 analysis_radius: 200
+vmax_for_plotting: 500

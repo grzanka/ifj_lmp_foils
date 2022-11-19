@@ -10,7 +10,6 @@ Datasets:
 entrance dose 20 Gy
 collimator with 10mm diameter
 
-TODO
 
 2020.10.09 - SOBP eyeball
 -------------------------
@@ -18,7 +17,7 @@ TODO
 Processing time 7min on 16 CPU
 
 ```bash
-snakemake --snakefile Snakefile_2020_10_09_sobp_eyeball --cores all
+time snakemake --configfile data/external/snakemake_configs/TODO.yaml --cores all
 ```
 
 2020.10.12 - Co60 reference
@@ -27,7 +26,7 @@ snakemake --snakefile Snakefile_2020_10_09_sobp_eyeball --cores all
 60 Gy reference dose
 
 ```bash
-snakemake --snakefile Snakefile_2020_10_12_Co60 --cores all
+time snakemake --configfile data/external/snakemake_configs/2020_10_12_Co60.yaml --cores all
 ```
 
 2021.11.18 - BP/SOBP
@@ -93,4 +92,9 @@ fetching files from OneDrive:
 
 ```bash
 rclone sync onedriveifj:LMP_foils data/raw/foils
+```
+
+run all datasets:
+```bash
+find data/external/snakemake_configs/ -name "20*yaml" -exec snakemake --configfile {} --cores all \;
 ```

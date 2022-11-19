@@ -1,4 +1,5 @@
 datasets :
+  - '1'
   - '2'
   - '3'
   - '4'
@@ -38,7 +39,9 @@ datasets :
   - '38'
   - '39'
   - '40'
+  - '41'
+  - '42'
 
-background : 'bg_30s'
-measurment_directory : '2020_10_12_Co60'
-vmax_for_plotting: 200
+background : 'tlo_as_of_Co60'
+
+measurment_directory : '2022_11_08_background'

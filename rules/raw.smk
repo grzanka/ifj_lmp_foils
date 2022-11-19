@@ -178,7 +178,7 @@ rule align_top:
 
         np.save(file=output.data, arr=np.array(rotated))
 
-rule plot_stages:
+rule plot_2d_images:
     input:
         bg_removed=rules.background_image_subtraction.output.data,
         flat_field=rules.flat_field.output.data,
@@ -188,7 +188,9 @@ rule plot_stages:
         analysis_circle=rules.circles.output.analysis_circle,
         aligned_analysis_circle=rules.circles.output.aligned_analysis_circle,
     output:
-        plot_file="data/interim/foils/{measurment_directory}/{dataset}/stages.pdf",
+        plot_file="data/interim/foils/{measurment_directory}/{dataset}/images2d.pdf",
+    params:
+        vmax_for_plotting=vmax_for_plotting,
     benchmark:
         "data/interim/foils/{measurment_directory}/{dataset}/benchmark/plot_stages.tsv",
     run:
@@ -202,7 +204,7 @@ rule plot_stages:
         for col_id, filename in enumerate((input.bg_removed, input.flat_field, input.aligned)):        
             ref_data = np.load(file=filename)
             ref_data_for_plotting = np.clip(ref_data, a_min=None, a_max=np.nanpercentile(a=ref_data, q=95))
-            ref_data_plot = axes[col_id].imshow(ref_data_for_plotting, cmap='terrain', vmin=0, vmax=vmax_ref_data);
+            ref_data_plot = axes[col_id].imshow(ref_data_for_plotting, cmap='terrain', vmin=0, vmax=vmax_for_plotting);
             basename = Path(filename).stem
 
             axes[col_id].set_title(f'{basename}')
