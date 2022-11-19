@@ -79,13 +79,38 @@ rule detector_circle:
     input:
         data=rules.image_contour.output.data,
     output:
-        data="data/interim/foils/{measurment_directory}/{dataset}lv/det-circle.json",
+        det_circle="data/interim/foils/{measurment_directory}/{dataset}lv/det-circle.json",
+        aligned_det_circle="data/interim/foils/{measurment_directory}/{dataset}lv/aligned-det-circle.json",
     benchmark:
         "data/interim/foils/{measurment_directory}/{dataset}/benchmark/detector_circle.tsv",
     run:
         data = np.load(file=input.data)
-        circle = find_circle_hough_method(data)
-        circle.save_json(output.data)
+        det_circle = find_circle_hough_method(data)
+        aligned_det_circle = Circle(x=data.shape[1]/2, y=data.shape[0]/2, r=det_circle.r)
+        det_circle.save_json(output.det_circle)
+        aligned_det_circle.save_json(output.aligned_det_circle)
+
+rule circles:
+    input:
+        data=rules.image_contour.output.data,
+        detector_circle=rules.detector_circle.output.det_circle
+    output:
+        analysis_circle="data/interim/foils/{measurment_directory}/{dataset}/analysis-circle.json",
+        aligned_analysis_circle="data/interim/foils/{measurment_directory}/{dataset}/aligned-analysis-circle.json"
+    params:
+        analysis_radius=analysis_radius
+    benchmark:
+        "data/interim/foils/{measurment_directory}/{dataset}/benchmark/analysis_circles.tsv"
+    run:
+        data = np.load(file=input.data)
+        detector_circle = Circle.from_json(input.detector_circle)
+
+        analysis_circle = Circle(x=detector_circle.x, y=detector_circle.y, r=params.analysis_radius)
+        aligned_analysis_circle = Circle(x=data.shape[1]/2, y=data.shape[0]/2, r=params.analysis_radius)
+
+        analysis_circle.save_json(output.analysis_circle)
+        aligned_analysis_circle.save_json(output.aligned_analysis_circle)
+
 
 rule flat_field:
     input:
@@ -117,7 +142,7 @@ rule flat_field:
 rule signal_on_circle:
     input:
         image="data/interim/foils/{measurment_directory}/{dataset}lv/raw.npy",
-        circle=rules.detector_circle.output.data,
+        circle=rules.detector_circle.output.det_circle,
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}/angle.npy",
     benchmark:
@@ -136,10 +161,9 @@ rule align_top:
     input:
         angle=rules.signal_on_circle.output.data,
         image=rules.flat_field.output.data,
-        circle=rules.detector_circle.output.data
+        circle=rules.detector_circle.output.det_circle
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}/raw-aligned.npy",
-        aligned_det_circle="data/interim/foils/{measurment_directory}/{dataset}/aligned-det-circle.json",
     benchmark:
         "data/interim/foils/{measurment_directory}/{dataset}/benchmark/align_top.tsv",
     run:
@@ -151,30 +175,27 @@ rule align_top:
         shifted = ndimage.shift(data, (data.shape[1]/2-circle.y,data.shape[0]/2-circle.x), cval=np.nan, prefilter=False)
         # rotate image, so the mark is on the top
         rotated = ndimage.rotate(shifted, -angle, cval=np.nan, reshape=False, prefilter=False)
-        aligned_circle = Circle(x=data.shape[1]/2, y=data.shape[0]/2, r=circle.r)
 
         np.save(file=output.data, arr=np.array(rotated))
-        aligned_circle.save_json(output.aligned_det_circle)
 
 rule plot_stages:
     input:
         bg_removed=rules.background_image_subtraction.output.data,
         flat_field=rules.flat_field.output.data,
         aligned=rules.align_top.output.data,
-        det_circle=rules.detector_circle.output.data,
-        aligned_det_circle=rules.align_top.output.aligned_det_circle,    
+        det_circle=rules.detector_circle.output.det_circle,
+        aligned_det_circle=rules.detector_circle.output.aligned_det_circle,
+        analysis_circle=rules.circles.output.analysis_circle,
+        aligned_analysis_circle=rules.circles.output.aligned_analysis_circle,
     output:
         plot_file="data/interim/foils/{measurment_directory}/{dataset}/stages.pdf",
     benchmark:
         "data/interim/foils/{measurment_directory}/{dataset}/benchmark/plot_stages.tsv",
-    params:
-        analysis_radius=analysis_radius,
     run:
         det_circle = Circle.from_json(input.det_circle)
         aligned_det_circle = Circle.from_json(input.aligned_det_circle)
-
-        analysis_circle = Circle(x=det_circle.x, y=det_circle.y, r=analysis_radius)
-        aligned_analysis_circle = Circle(x=aligned_det_circle.x, y=aligned_det_circle.y, r=analysis_radius)
+        analysis_circle = Circle.from_json(input.analysis_circle)
+        aligned_analysis_circle = Circle.from_json(input.aligned_analysis_circle)
 
         fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(16,10))
 
