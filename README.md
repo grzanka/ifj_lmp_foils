@@ -77,7 +77,8 @@ TODO: check which radius is used for reference radiation
 what happens if a different radius is for reference than for protons
 
 ```bash
-time snakemake --snakefile Snakefile_generic --configfile data/raw/ifj_data/2022_11_17_bp/config.yaml -c all
+time snakemake --configfile data/external/snakemake_configs/2022_11_17_bp.yaml --cores all
+time snakemake --configfile data/external/snakemake_configs/2022_11_18_sobp.yaml --cores all
 ```
 
 Helper

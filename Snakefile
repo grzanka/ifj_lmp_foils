@@ -5,7 +5,7 @@ wildcard_constraints:
 
 
 # IRI datasets
-configfile: "data/raw/ifj_data/TODO/config.yaml"
+configfile: "data/external/snakemake_configs/dry_run.yaml"
 datasets = config["datasets"]
 background = config["background"]
 measurement_directory = config["measurment_directory"]
