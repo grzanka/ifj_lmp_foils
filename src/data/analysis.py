@@ -96,6 +96,7 @@ def median_filter(input: npt.NDArray, size: int = 10, gpu: bool = False) -> npt.
     '''apply median filter'''
     logging.info('Before median filter ' +
                  f'min {np.nanmin(input)}, mean max {np.nanmean(input):3.3f}, max {np.nanmax(input)}')
+    output = np.empty(shape=1)
     if gpu:
         try:
             import cupy as cp
@@ -177,7 +178,7 @@ def find_detector(input: npt.NDArray,
                   threshold: float = 0.3,
                   const_bg: float = 0,
                   circle: Optional[Circle] = None,
-                  gpu: bool = False) -> Circle:
+                  gpu: bool = False) -> Tuple[Circle, npt.NDArray]:
     '''
     find the detector on the live-view image,
     returns position of detector center and its radius
@@ -247,93 +248,10 @@ def get_line_circle(img: npt.NDArray, circ: Circle, step_angle_deg: float = 1.0,
 
 def get_angle_with_min_value(array_of_angles_deg: npt.NDArray,
                              values_on_circle: npt.NDArray,
-                             median_filter_size: int = 10) -> Tuple[float]:
+                             median_filter_size: int = 10) -> Tuple[float, npt.NDArray]:
     min_value = ndimage.median_filter(input=values_on_circle, size=median_filter_size)
     min_value_angle_deg = array_of_angles_deg[np.nanargmin(min_value)]
     return min_value_angle_deg, min_value
-
-
-def cropToMask(img, circMask):
-    # crop image to mask
-    imgMask = create_circular_mask(img, circMask)
-    imgMask = imgMask.astype('uint8') * 255
-    maskRect = cv2.boundingRect(imgMask)
-    return (img[maskRect[1]:(maskRect[1] + maskRect[3]), maskRect[0]:(maskRect[0] + maskRect[2])], maskRect)
-
-
-def correctImg(img, imgFF=None, imgBG=None, CBG=0, medianFilter=1, circMask=None):
-    imgProc = img.copy()
-
-    # create a mask
-    if circMask is not None:
-        imgMask = create_circular_mask(img, circMask)
-    else:
-        imgMask = np.ones(img.shape).astype('bool')
-
-    # BG remove
-    if imgBG is not None:
-        imgProc = imgProc - imgBG
-    imgProc -= CBG
-    imgProc[imgProc < 0] = 0
-
-    # FF correction (https://en.wikipedia.org/wiki/Flat-field_correction)
-    if imgFF is not None:
-        imgFFcorr = imgFF - imgBG
-        imgFFcorr = imgFFcorr / np.nanmean(imgFFcorr[imgMask])
-        imgProc[imgMask] = (imgProc[imgMask] / imgFFcorr[imgMask])
-
-    # MF median filter
-    if medianFilter is not None and medianFilter != 1:
-        imgProc = ndimage.median_filter(imgProc, size=medianFilter)
-
-    # apply mask
-    imgProc[imgProc < 0] = 0
-    imgProc[~imgMask] = np.nan
-
-    return imgProc
-
-
-def rotateImg(img, angle):
-    # rotate image around its centre
-    img[np.isnan(img)] = -1
-    if angle != 0:
-        img = ndimage.rotate(img, angle, reshape=False, cval=np.nan, prefilter=False)
-    img[img < 0] = np.nan
-    return img
-
-
-def resizeImg(img, size):
-    # resample image
-    img = cv2.resize(img, dsize=size, interpolation=cv2.INTER_LANCZOS4)
-    img[img < 0] = 0
-    return img
-
-
-def fillHoles(img):
-
-    imgInPaintMask = img.copy()
-    imgInPaintMask[imgInPaintMask > 0] = 1
-    imgInPaintMask[imgInPaintMask == 0] = 0
-    imgInPaintMask[np.isnan(imgInPaintMask)] = 1
-    imgInPaintMask = imgInPaintMask.astype('bool')
-    imgInPaintMask = np.invert(imgInPaintMask)
-    imgInPaintMask = imgInPaintMask.astype('uint8')
-    img = cv2.inpaint(img, imgInPaintMask, 3, cv2.INPAINT_TELEA)
-    return (img)
-
-
-def correctIRI(imgMeas, circMeas, imgIRI, circIRI, rotateIRI=0):
-    imgMeasCrop, rectMeasCrop = cropToMask(imgMeas, circMeas)
-    imgIRI, rectIRI = cropToMask(imgIRI, circIRI)
-    imgIRI = resizeImg(imgIRI, size=(rectMeasCrop[2], rectMeasCrop[3]))
-    imgIRI = fillHoles(imgIRI)
-    imgIRI = rotateImg(imgIRI, angle=0)
-    IRFmean = np.nanmean(imgIRI)
-    IRFstd = np.nanstd(imgIRI)
-    imgIRI = imgIRI / IRFmean
-    imgMeasIRI = imgMeasCrop / imgIRI
-
-    return (imgMeasIRI, IRFmean, IRFstd)
 
 
 def label_text(data: npt.NDArray, title : str) -> str:
@@ -351,7 +269,7 @@ def label_text(data: npt.NDArray, title : str) -> str:
     return result
     
 
-def min_max_area_loc(data: npt.NDArray, circle_px: Circle, window_size : int = 10) -> Tuple[Tuple[float]]:
+def min_max_area_loc(data: npt.NDArray, circle_px: Circle, window_size : int = 10) -> Tuple[Tuple[int, int], Tuple[int, int]]:
     N,M = window_size, window_size
     P,Q = data.shape
     mask_for_circle = create_circular_mask(img=data, circle_px=circle_px)
@@ -369,11 +287,12 @@ def min_max_area_loc(data: npt.NDArray, circle_px: Circle, window_size : int = 1
     return (min_center, max_center)
     
 
-def plot_data(data : npt.NDArray, path : str, circle_px: Circle = None, details : bool = False):
+def plot_data(data : npt.NDArray, path : str, circle_px: Optional[Circle] = None, details : bool = False):
     circle = circle_px
     if not circle:
         circle = Circle(x=data.shape[0]/2,y=data.shape[0]/2,r=250)
 
+    axes = [[]]
     if details:
         fig, axes = plt.subplots(ncols=2, nrows=2, figsize=(16,10), constrained_layout=True)
         ax = axes[0][0]
@@ -428,7 +347,6 @@ def plot_data(data : npt.NDArray, path : str, circle_px: Circle = None, details 
         section_cut_y = circle.y + circle.r/2
         window_size = 10
         min_center, max_center = min_max_area_loc(data, circle_px = circle, window_size=window_size)
-        min_center, max_center
         axes[0][0].set_xlabel("X")
         axes[0][0].set_ylabel("Y")
 
@@ -440,7 +358,7 @@ def plot_data(data : npt.NDArray, path : str, circle_px: Circle = None, details 
         axes[0][0].axhline(min_center[1], color='green')
         axes[0][0].axhline(max_center[1], color='red')
 
-        def section(data, location, window_size, axis : int, circle_px : Circle = None):
+        def section(data, location, window_size, axis : int, circle_px : Optional[Circle] = None):
             start = int(location - window_size/2)
             stop = int(location + window_size/2)    
             if axis == 1: # along Y, fixed X
@@ -501,11 +419,11 @@ def plot_data(data : npt.NDArray, path : str, circle_px: Circle = None, details 
 
 def get_mean_std(data: npt.NDArray, circle : Circle) -> Tuple[float, float]:
     mask = create_circular_mask(img=data, circle_px=circle)
-    mean = np.nanmean(data[mask])
-    std = np.nanstd(data[mask])
+    mean = np.nanmean(data[mask]).astype(float)
+    std = np.nanstd(data[mask]).astype(float)
     return mean, std
 
-def get_timestamp(filepath : str) -> datetime:
+def get_timestamp(filepath : str) -> datetime.datetime:
     metada_contents = ''
     with open(filepath, 'r', encoding="ISO-8859-1") as metadata_file:
         metada_contents = metadata_file.read()
