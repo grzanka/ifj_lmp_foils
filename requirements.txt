@@ -4,6 +4,7 @@
 # external requirements
 yapf
 pytest
+nbmake
 
 # project
 numpy>=1.20
