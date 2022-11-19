@@ -41,10 +41,4 @@ datasets :
   - '40'
 
 background : 'tlo_30s'
-
-base_raw_dir: 'data/raw/foils'
 measurment_directory : '2022_11_18_sobp'
-
-output_dir: 'data/interim/foils'
-
-radius: 200

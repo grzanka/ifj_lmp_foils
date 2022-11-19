@@ -3,4 +3,5 @@ background : ''
 measurment_directory : ''
 base_raw_dir: 'data/raw/foils'
 output_dir: 'data/interim/foils'
-radius: 200
+ff_radius: 300
+analysis_radius: 200

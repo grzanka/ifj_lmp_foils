@@ -80,27 +80,26 @@ rule detector_circle:
 rule flat_field:
     input:
         data="data/interim/foils/{measurment_directory}/{dataset}/raw-bg-image-removed.npy",
-        white_image=f"data/interim/foils/{ff_white_image}/raw.npy",
-        circle=rules.detector_circle.output.data
+        white_image=f"data/interim/foils/{ff_white_image}/raw.npy"
     output:
         data="data/interim/foils/{measurment_directory}/{dataset}/raw-after-ff.npy",
-        analysis_circle="data/interim/foils/{measurment_directory}/{dataset}/ff-circle.json",
+        ff_circle="data/interim/foils/{measurment_directory}/{dataset}/ff-circle.json",
+    params:
+        radius=ff_radius,
     run:
         data = np.load(file=input.data)
         white_data = np.load(file=input.white_image)
-        white_data_full = np.load(file=input.white_image)
-        circle = Circle.from_json(input.circle)
 
-        analysis_circle = Circle(x=circle.x, y=circle.y, r=radius )
-        mask = create_circular_mask(img=white_data, circle_px=analysis_circle)
-        white_data[~mask] = np.nan
+        # circle around the image center with given radius
+        ff_circle = Circle(x=data.shape[1]/2, y=data.shape[0]/2, r=params.radius)
+        mask = create_circular_mask(img=white_data, circle_px=ff_circle)
         
         # calculate FF correction on the full image
         # mean value is calculated only in the given radius from detector center
-        gain_full = np.nanmean(white_data) / white_data_full
+        gain_full = np.nanmean(white_data[mask]) / white_data
         corr_data_full = data * gain_full
 
-        analysis_circle.save_json(output.analysis_circle)
+        ff_circle.save_json(output.ff_circle)
         np.save(file=output.data, arr=corr_data_full)
 
 rule signal_on_circle:
@@ -150,12 +149,14 @@ rule plot_stages:
         aligned_det_circle=rules.align_top.output.aligned_det_circle,    
     output:
         plot_file="data/interim/foils/{measurment_directory}/{dataset}/stages.pdf",
+    params:
+        analysis_radius=analysis_radius,
     run:
         det_circle = Circle.from_json(input.det_circle)
         aligned_det_circle = Circle.from_json(input.aligned_det_circle)
 
-        analysis_circle = Circle(x=det_circle.x, y=det_circle.y, r=radius)
-        aligned_analysis_circle = Circle(x=aligned_det_circle.x, y=aligned_det_circle.y, r=radius)
+        analysis_circle = Circle(x=det_circle.x, y=det_circle.y, r=analysis_radius)
+        aligned_analysis_circle = Circle(x=aligned_det_circle.x, y=aligned_det_circle.y, r=analysis_radius)
 
         fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(16,10))
 

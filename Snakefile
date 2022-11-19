@@ -5,17 +5,15 @@ wildcard_constraints:
 
 
 # IRI datasets
-configfile: "data/external/snakemake_configs/dry_run.yaml"
+configfile: "data/external/snakemake_configs/main.yaml"
 datasets = config["datasets"]
 background = config["background"]
 measurement_directory = config["measurment_directory"]
-
-radius = config["radius"]
+analysis_radius = config["analysis_radius"]
 
 # basic datasets
 ff_white_image = '2022_08_22_flat_field/FF_2sLED_U340/FF_1'
-
-#radius = 300
+ff_radius = config['ff_radius']
 vmax_ref_data = 50
 
 # master rule which requires generates all plots

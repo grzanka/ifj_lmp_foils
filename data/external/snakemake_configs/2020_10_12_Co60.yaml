@@ -1,5 +1,4 @@
 datasets :
-  - '1'
   - '2'
   - '3'
   - '4'
@@ -40,5 +39,5 @@ datasets :
   - '39'
   - '40'
 
-background : 'tlo_30s'
-measurment_directory : '2022_11_17_bp'
+background : 'bg_30s'
+measurment_directory : '2020_10_12_Co60'
