@@ -13,8 +13,7 @@ def img_path(request):
     if marker:
         experiment_id = marker.args[0]
 
-    data_path = Path(project_dir, 'data', 'raw', 'ifj_data', '20201012_Co60', experiment_id, 'Pos0',
-                     'img_000000000_Default_000.tif')
+    data_path = Path(project_dir, 'test', 'res', experiment_id, 'Pos0', 'img_000000000_Default_000.tif')
     return data_path
 
 
@@ -27,8 +26,7 @@ def detector_image(img_path):
 @pytest.fixture
 def detector_image_bg():
     return read_tiff_img(
-        Path(project_dir, 'data', 'raw', 'ifj_data', '20201012_Co60', 'bg_30s', 'Pos0',
-             'img_000000000_Default_000.tif'))
+        Path(project_dir, 'test', 'res', 'bg_30s', 'Pos0', 'img_000000000_Default_000.tif'))
 
 
 @pytest.fixture
@@ -61,7 +59,7 @@ def test_median_filter(detector_image: npt.NDArray, size: int):
 @pytest.mark.experiment_id('2lv')
 def test_find_det(detector_image: npt.NDArray, detector_image_bg: npt.NDArray):
     det_circle, _ = find_detector(detector_image, img_bg=detector_image_bg)
-    assert det_circle == Circle(x=582, y=568, r=488)
+    assert det_circle == Circle(x=581.5, y=567.5, r=487.79998779296875)
 
 
 @pytest.mark.experiment_id('2lv')
@@ -69,15 +67,4 @@ def test_find_angle(detector_image: npt.NDArray, detector_circle: Circle):
     meas_circle = Circle(detector_circle.x, detector_circle.y, detector_circle.r - 60)
     array_of_angles_deg, values_on_circle = get_line_circle(detector_image, circ=meas_circle, step_angle_deg=0.1)
     angle_with_min_value, _ = get_angle_with_min_value(array_of_angles_deg, values_on_circle)
-    assert angle_with_min_value == pytest.approx(47.7)
-
-
-# @pytest.mark.parametrize("size", [1, 10, 20])
-# def test_my_stuff(benchmark, detector_image, size):
-#     # benchmark something
-#     result = benchmark(test_median_filter, detector_image, size)
-
-#     # Extra code, to verify that the run completed correctly.
-#     # Sometimes you may want to check the result, fast functions
-#     # are no good if they return incorrect results :-)
-#     assert result is not None
+    assert angle_with_min_value == pytest.approx(48.8)
