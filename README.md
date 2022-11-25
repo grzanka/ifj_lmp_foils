@@ -91,7 +91,7 @@ find . -name "*_lv" -exec bash -c 'mv $1 ${1/\_/}' bash {} \;
 fetching files from OneDrive:
 
 ```bash
-rclone sync onedriveifj:LMP_foils data/raw/foils
+rclone sync onedriveifj:LMP_foils/raw data/raw/foils
 ```
 
 run all datasets:
