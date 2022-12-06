@@ -24,9 +24,9 @@ jobs:
       - name: Python Dependency Installation
         run: pip install -r requirements.txt
           
-      - name: Test notebooks
-        run: |
-          pytest --nbmake **/**/*ipynb
+      # - name: Test notebooks
+      #   run: |
+      #     pytest --nbmake **/**/*ipynb
 
       - name: Test code
         run: pytest test
