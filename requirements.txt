@@ -3,6 +3,8 @@
 
 # external requirements
 yapf
+pytest
+nbmake
 
 # project
 numpy>=1.20
@@ -12,3 +14,4 @@ scipy
 opencv-python-headless
 tqdm
 snakemake
+pandas

@@ -40,5 +40,5 @@ datasets :
   - '39'
   - '40'
 
-background : 'tlo_30s'
-measurment_directory : '2022_11_17_bp'
+background : 'ttm'
+measurment_directory : '2022_11_23_Co60'

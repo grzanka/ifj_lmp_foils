@@ -1,0 +1,7 @@
+datasets :
+  - '2'
+  - '3'
+  - '4'
+
+background : 'bg_30s'
+measurment_directory : '2020_10_12_Co60'

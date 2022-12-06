@@ -10,7 +10,6 @@ Datasets:
 entrance dose 20 Gy
 collimator with 10mm diameter
 
-TODO
 
 2020.10.09 - SOBP eyeball
 -------------------------
@@ -18,7 +17,7 @@ TODO
 Processing time 7min on 16 CPU
 
 ```bash
-snakemake --snakefile Snakefile_2020_10_09_sobp_eyeball --cores all
+time snakemake --configfile data/external/snakemake_configs/TODO.yaml --cores all
 ```
 
 2020.10.12 - Co60 reference
@@ -27,7 +26,7 @@ snakemake --snakefile Snakefile_2020_10_09_sobp_eyeball --cores all
 60 Gy reference dose
 
 ```bash
-snakemake --snakefile Snakefile_2020_10_12_Co60 --cores all
+time snakemake --configfile data/external/snakemake_configs/2020_10_12_Co60.yaml --cores all
 ```
 
 2021.11.18 - BP/SOBP
@@ -77,7 +76,8 @@ TODO: check which radius is used for reference radiation
 what happens if a different radius is for reference than for protons
 
 ```bash
-time snakemake --snakefile Snakefile_generic --configfile data/raw/ifj_data/2022_11_17_bp/config.yaml -c all
+time snakemake --configfile data/external/snakemake_configs/2022_11_17_bp.yaml --cores all
+time snakemake --configfile data/external/snakemake_configs/2022_11_18_sobp.yaml --cores all
 ```
 
 Helper
@@ -91,5 +91,10 @@ find . -name "*_lv" -exec bash -c 'mv $1 ${1/\_/}' bash {} \;
 fetching files from OneDrive:
 
 ```bash
-rclone sync onedriveifj:LMP_foils data/raw/foils
+rclone sync onedriveifj:LMP_foils/raw data/raw/foils
+```
+
+run all datasets:
+```bash
+find data/external/snakemake_configs/ -name "20*yaml" -exec snakemake --configfile {} --cores all \;
 ```

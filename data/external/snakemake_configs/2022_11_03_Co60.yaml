@@ -1,6 +1,6 @@
 datasets :
   - '1'
-  - '2'
+#  - '2' # missing live view
   - '3'
   - '4'
   - '5'
@@ -10,7 +10,6 @@ datasets :
   - '9'
   - '10'
   - '11'
-  - '12'
   - '13'
   - '14'
   - '15'
@@ -40,5 +39,5 @@ datasets :
   - '39'
   - '40'
 
-background : 'tlo_30s'
-measurment_directory : '2022_11_17_bp'
+background : 'tlo_30s1'
+measurment_directory : '2022_11_03_Co60'
