@@ -1,0 +1,46 @@
+wildcard_constraints:
+    measurment_directory="\w+"
+
+configfile: "data/external/snakemake_configs/main.yaml"
+datasets = config["datasets"]
+background = config["background"]
+measurement_directory = config["measurment_directory"]
+analysis_radius = config["analysis_radius"]
+
+# ff_white_image = '2022_08_22_flat_field/FF_2sLED_U340/FF_1'
+# ff_radius = config['ff_radius']
+
+vmax_for_plotting = config['vmax_for_plotting']
+
+X = expand(
+            "data/interim/foils/{measurment_directory}/{datasets}/raw.npy",
+            zip,
+            datasets=datasets,
+            measurment_directory=[measurement_directory]*len(datasets)
+        )
+print(X)
+
+# master rule which requires generates all plots
+rule all:
+    input:
+        # expect raw file readed for basic, IRI and FF datasets
+        expand(
+            "data/interim/foils/{measurment_directory}/{datasets}/raw.npy",
+            zip,
+            datasets=datasets,
+            measurment_directory=[measurement_directory]*len(datasets)
+        ),
+        expand(
+            "data/interim/foils/{measurment_directory}/{datasets}/metadata.txt",
+            zip,
+            datasets=datasets,
+            measurment_directory=[measurement_directory]*len(datasets)
+        ),
+        expand(
+            "data/interim/foils/{measurment_directory}/{datasets}lv/angle.npy",
+            zip,
+            datasets=datasets,
+            measurment_directory=[measurement_directory]*len(datasets)
+        )
+
+include: "rules/find_det.smk"

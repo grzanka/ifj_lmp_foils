@@ -94,6 +94,12 @@ fetching files from OneDrive:
 rclone sync onedriveifj:LMP_foils/raw data/raw/foils
 ```
 
+submitting interim results:
+```bash
+rclone sync data/interim/foils ifjonedrive_interim:
+```
+
+
 run all datasets:
 ```bash
 find data/external/snakemake_configs/ -name "20*yaml" -exec snakemake --configfile {} --cores all \;

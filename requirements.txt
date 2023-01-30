@@ -15,3 +15,4 @@ opencv-python-headless
 tqdm
 snakemake
 pandas
+seaborn
