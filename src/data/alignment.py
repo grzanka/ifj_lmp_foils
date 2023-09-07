@@ -45,5 +45,5 @@ def get_angle_with_min_value(array_of_angles_deg: npt.NDArray,
                              values_on_circle: npt.NDArray,
                              median_filter_size: int = 10) -> Tuple[float, npt.NDArray]:
     min_value = ndimage.median_filter(input=values_on_circle, size=median_filter_size)
-    min_value_angle_deg = array_of_angles_deg[np.nanargmin(min_value)]
+    min_value_angle_deg = array_of_angles_deg[np.nanargmin(min_value)]    
     return min_value_angle_deg, min_value

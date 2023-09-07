@@ -12,6 +12,9 @@ ff_radius = config['ff_radius']
 
 vmax_for_plotting = config['vmax_for_plotting']
 
+# print background
+print(f"background: {background}")
+
 # master rule which requires generates all plots
 rule all:
     input:
@@ -22,24 +25,24 @@ rule all:
             datasets=datasets,
             measurment_directory=[measurement_directory]*len(datasets)
         ),
-        expand(
-            "data/interim/foils/{measurment_directory}/{datasets}/raw-after-ff.npy",
-            zip,
-            datasets=datasets,
-            measurment_directory=[measurement_directory]*len(datasets)
-        ),
-        expand(
-            "data/interim/foils/{measurment_directory}/{datasets}/raw-aligned.npy",
-            zip,
-            datasets=datasets,
-            measurment_directory=[measurement_directory]*len(datasets)
-        ),
-        expand(
-            "data/interim/foils/{measurment_directory}/images2d.pdf",
-            zip,
-            datasets=datasets,
-            measurment_directory=[measurement_directory]*len(datasets)
-        ),
+        # expand(
+        #     "data/interim/foils/{measurment_directory}/{datasets}/raw-after-ff.npy",
+        #     zip,
+        #     datasets=datasets,
+        #     measurment_directory=[measurement_directory]*len(datasets)
+        # ),
+        # expand(
+        #     "data/interim/foils/{measurment_directory}/{datasets}/raw-aligned.npy",
+        #     zip,
+        #     datasets=datasets,
+        #     measurment_directory=[measurement_directory]*len(datasets)
+        # ),
+        # expand(
+        #     "data/interim/foils/{measurment_directory}/images2d.pdf",
+        #     zip,
+        #     datasets=datasets,
+        #     measurment_directory=[measurement_directory]*len(datasets)
+        # ),
         # expand(
         #     "data/interim/foils/{measurment_directory}/signal.pdf",
         #     zip,

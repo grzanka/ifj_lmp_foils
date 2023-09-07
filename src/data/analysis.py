@@ -4,12 +4,13 @@ import json
 import logging
 import math
 from dataclasses import dataclass
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 from scipy import ndimage
+import pandas as pd
 
 from src.data.paths import PathLike
 
@@ -155,3 +156,16 @@ def get_timestamp(filepath : str) -> datetime.datetime:
     time_str = parsed_json['Summary']['Time']  # or 'StartTime'
     result = datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S %z')
     return result
+
+def perc_error_to_ref_df(df: pd.DataFrame,
+                         xcolname: str,
+                         ycolname: str,
+                         ref_df: pd.DataFrame,
+                         ref_xcolname: str,
+                         ref_ycolname: str,
+                         threshold: float = 0.01) -> pd.DataFrame:
+    filter = df[ycolname] > threshold
+    rel_error = df[ycolname][filter] / np.interp(
+        x=df[xcolname][filter], xp=ref_df[ref_xcolname], fp=ref_df[ref_ycolname])
+    df = pd.DataFrame({'z': df[xcolname][filter], 'perc_err': 100 * (rel_error - 1.0)})
+    return df
